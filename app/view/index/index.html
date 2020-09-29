@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>大文件分片上传</title>
+    <link rel="stylesheet" href="/plugin/webuploader-0.1.5/webuploader.css">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="/plugin/webuploader-0.1.5/webuploader.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="uploader">
+            <!--用来存放文件信息-->
+            <div class="queueList">
+                <div id="the_613" class="placeholder">
+                    <div id="pick_613" class="webuploader-container">选择视频</div>
+                    <p>点击选择要上传的视频</p>
+                </div>
+            </div>
+
+            <div class="statusBar">
+                <div class="btns">
+                    <div id="Btn_613" class="uploadBtn">开始上传</div>
+                </div>
+            </div>
+
+            <div id="path">
+                <input id="foo" value="">
+                <button class="btn" data-clipboard-target="#foo"><img src="/plugin/webuploader-0.1.5/images/copy.png" alt="复制到粘贴板"></button>
+                <span id="result" style="color: green;display: none;">已复制</span>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script>
+        uploadfiles(613, "video");
+        //上传文件函数
+        //ids唯一ID
+        //folder文件保存目录
+        function uploadfiles(ids,folder) {
+            $(function(){
+                var $list = $("#the_"+ids);
+                $btn = $("#Btn_"+ids);
+                var uploader = WebUploader.create({
+                    resize: false, // 不压缩image
+                    swf: '__PLUGIN__/webuploader-0.1.5/uploader.swf', // swf文件路径
+                    server: '{:url("index/uploadFile")}', // 文件接收服务端。
+                    pick: "#pick_"+ids, // 选择文件的按钮。可选
+                    chunked: true, //是否要分片处理大文件上传
+                    chunkSize:5*1024*1024, //分片上传，每片2M，默认是5M
+                    //fileSizeLimit: 6*1024* 1024 * 1024,    // 所有文件总大小限制 6G
+                    fileSingleSizeLimit: 10*1024* 1024 * 1024,    // 单个文件大小限制 5 G
+                    formData: {
+                        folder:folder  //自定义参数
+                    }
+                    //auto: false //选择文件后是否自动上传
+                    // chunkRetry : 2, //如果某个分片由于网络问题出错，允许自动重传次数
+                    //runtimeOrder: 'html5,flash',
+                    // accept: {
+                    //   title: 'Images',
+                    //   extensions: 'gif,jpg,jpeg,bmp,png',
+                    //   mimeTypes: 'image/*'
+                    // }
+                });
+                // 当有文件被添加进队列的时候
+                uploader.on( 'fileQueued', function( file ) {
+                    $list.append( '<div id="' + file.id + '" class="item">' +
+                        '<h4 class="info">' + file.name + '</h4>' +
+                        '<p class="state">等待上传...</p>' +
+                        '</div>' );
+                });
+                // 文件上传过程中创建进度条实时显示。
+                uploader.on( 'uploadProgress', function( file, percentage ) {
+                    var $li = $( '#'+file.id ),
+                        $percent = $li.find('.progress .progress-bar');
+
+                    // 避免重复创建
+                    if ( !$percent.length ) {
+                        $percent = $('<div class="progress progress-striped active">' +
+                            '<div class="progress-bar" role="progressbar" style="width: 0%">' +
+                            '</div>' +
+                            '</div>').appendTo( $li ).find('.progress-bar');
+                    }
+
+                    // percentage = Number(percentage);
+                    $li.find('p.state').text('上传中'+(percentage * 100 + '%'));
+
+                    $percent.css( 'width', percentage * 100 + '%' );
+                });
+                // 文件上传成功
+                uploader.on( 'uploadSuccess', function( file,response) {
+                    $( '#'+file.id ).find('p.state').text('已上传');
+                    $list.append('<input type="hidden" name="'+ids+'" value="'+response.filePath+'" />');
+                    //alert(response.filePath);
+                    $('#foo').val(response.fileUrl);
+                });
+
+                // 文件上传失败，显示上传出错
+                uploader.on( 'uploadError', function( file ) {
+                    $( '#'+file.id ).find('p.state').text('上传出错');
+                });
+                // 完成上传完
+                uploader.on( 'uploadComplete', function( file ) {
+                    $( '#'+file.id ).find('.progress').fadeOut();
+                });
+
+                $btn.on('click', function () {
+                    if ($(this).hasClass('disabled')) {
+                        return false;
+                    }
+                    uploader.upload();
+                    // if (state === 'ready') {
+                    //     uploader.upload();
+                    // } else if (state === 'paused') {
+                    //     uploader.upload();
+                    // } else if (state === 'uploading') {
+                    //     uploader.stop();
+                    // }
+                });
+            });
+        }
+
+
+        var clipboard = new ClipboardJS('.btn');
+
+        clipboard.on('success', function(e) {
+            console.info('Action:', e.action);
+            console.info('Text:', e.text);
+            console.info('Trigger:', e.trigger);
+            $('#result').show();
+            e.clearSelection();
+        });
+
+        clipboard.on('error', function(e) {
+            console.error('Action:', e.action);
+            console.error('Trigger:', e.trigger);
+        });
+    </script>
+</body>
+</html>
