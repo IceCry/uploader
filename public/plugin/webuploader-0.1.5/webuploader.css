@@ -1,3 +1,7 @@
+.container{
+    width: 1000px;
+    margin: 50px auto;
+}
 .webuploader-container {
 	position: relative;
 }
@@ -378,7 +382,7 @@
 }
 
 #uploader .statusBar .btns .uploadBtn {
-	background: #cccccc;
+	background: #5398d4;
 	color: #ffffff;
 	border-color: transparent;
 }

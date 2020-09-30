@@ -10,10 +10,12 @@ class Index extends BaseController
 
     protected $url = "http://www.uploader.com";
 
-    public function index()
+    public function index($key='')
     {
         //获取已上传文件列表
-
+        if($key!='49a8ced0b843bfa8e80c151744a0fdb2'){
+            return "<h4 style='font-size: 60px; margin-top: 200px; text-align: center;color: #fff;text-shadow: 0 8px 9px #c4b59d, 0px -2px 1px #fff;'>系统建设中</h4>";
+        }
 
         return View::fetch();
     }
@@ -41,8 +43,6 @@ class Index extends BaseController
 
         $cleanupTargetDir = true; // Remove old files
         $maxFileAge = 5 * 3600; // Temp file age in seconds
-
-        sleep(1);
 
         // Create target dir
         if (!file_exists($targetDir)) {

@@ -14,13 +14,13 @@
             <div class="queueList">
                 <div id="the_613" class="placeholder">
                     <div id="pick_613" class="webuploader-container">选择视频</div>
-                    <p>点击选择要上传的视频</p>
+                    <!--<p>点击选择要上传的视频</p>-->
                 </div>
             </div>
 
             <div class="statusBar">
                 <div class="btns">
-                    <div id="Btn_613" class="uploadBtn">开始上传</div>
+                    <div id="Btn_613" style="display: none;" class="uploadBtn">开始上传</div>
                 </div>
             </div>
 
@@ -50,23 +50,27 @@
                     server: '{:url("index/uploadFile")}', // 文件接收服务端。
                     pick: "#pick_"+ids, // 选择文件的按钮。可选
                     chunked: true, //是否要分片处理大文件上传
-                    chunkSize:5*1024*1024, //分片上传，每片2M，默认是5M
+                    chunkSize: 5*1024*1024, //分片上传，每片2M，默认是5M
                     //fileSizeLimit: 6*1024* 1024 * 1024,    // 所有文件总大小限制 6G
-                    fileSingleSizeLimit: 10*1024* 1024 * 1024,    // 单个文件大小限制 5 G
+                    fileSingleSizeLimit: 10*1024*1024*1024,    // 单个文件大小限制 5 G
                     formData: {
-                        folder:folder  //自定义参数
-                    }
+                        folder:folder //自定义参数
+                    },
                     //auto: false //选择文件后是否自动上传
                     // chunkRetry : 2, //如果某个分片由于网络问题出错，允许自动重传次数
                     //runtimeOrder: 'html5,flash',
-                    // accept: {
-                    //   title: 'Images',
-                    //   extensions: 'gif,jpg,jpeg,bmp,png',
-                    //   mimeTypes: 'image/*'
-                    // }
+                    accept: {
+                      title: 'V',
+                      extensions: '3gp,mp4,rmvb,mov,avi,m4v',
+                      mimeTypes: 'video/*'
+                    }
                 });
                 // 当有文件被添加进队列的时候
                 uploader.on( 'fileQueued', function( file ) {
+                    //隐藏上传按钮 仅支持单文件
+                    $('#pick_613').hide();
+                    $('#Btn_613').show();
+
                     $list.append( '<div id="' + file.id + '" class="item">' +
                         '<h4 class="info">' + file.name + '</h4>' +
                         '<p class="state">等待上传...</p>' +
@@ -74,6 +78,10 @@
                 });
                 // 文件上传过程中创建进度条实时显示。
                 uploader.on( 'uploadProgress', function( file, percentage ) {
+                    //隐藏上传按钮 仅支持单文件
+                    $('#pick_613').hide();
+                    $('#Btn_613').hide();
+
                     var $li = $( '#'+file.id ),
                         $percent = $li.find('.progress .progress-bar');
 
@@ -100,14 +108,20 @@
 
                 // 文件上传失败，显示上传出错
                 uploader.on( 'uploadError', function( file ) {
+                    $('#pick_613').show();
+                    $('#Btn_613').show();
                     $( '#'+file.id ).find('p.state').text('上传出错');
                 });
                 // 完成上传完
                 uploader.on( 'uploadComplete', function( file ) {
+                    // $('#pick_613').show();
+                    // $('#Btn_613').show();
                     $( '#'+file.id ).find('.progress').fadeOut();
                 });
 
                 $btn.on('click', function () {
+                    $('#Btn_613').hide();
+
                     if ($(this).hasClass('disabled')) {
                         return false;
                     }
